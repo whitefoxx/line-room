@@ -2429,7 +2429,12 @@ try {
 
         { id: 'fan', name: 'the fan', alias: 'fan', group: 'appliance',
           kind: 'spin', spinRate: 5, verbs: { on: 'on', off: 'off' },
-          proxy: proxy(4.0, 1.0, 4.0, 0, 6.05, 0), bold: h.fanRoot,
+          proxy: /* Thin. A 4x1x4 slab at ceiling height sweeps across the whole back
+           wall as the perspective flattens, and on a phone — where the camera
+           pulls a long way back to fit the room — it swallowed the light
+           switch and the door. Measured by sampling every device's projected
+           footprint at eight viewport sizes. */
+        proxy(2.5, 0.38, 2.5, 0, 6.05, 0), bold: h.fanRoot,
           sfx: (on) => audio.loop('fan', on),
           apply: (d, dt) => { h.fanG.rotation.y += d.v * dt; } },
 
@@ -2579,7 +2584,8 @@ try {
 
         { id: 'mobile', name: 'hanging mobile', alias: 'mobile',
           kind: 'spin', spinRate: 0.9, tv: 0.9, verbs: { on: 'turning', off: 'still' },
-          proxy: proxy(2.2, 2.2, 1.4, -4.6, 5.0, 2.6), bold: h.mobG,
+          proxy: /* likewise: the generous box hung in front of the curtains */
+        proxy(1.1, 1.2, 0.7, -4.6, 5.0, 2.6), bold: h.mobG,
           sfx: (on) => { audio.sfx('chime'); audio.loop('chimes', on); },
           apply: (d, dt, t) => { h.mobG.rotation.y += d.v * dt; h.mobG.rotation.x = 0.05 * Math.sin(t * 0.9) * Math.min(1, d.v / 0.9); } },
 
@@ -2905,9 +2911,17 @@ try {
     tools,
     system: '',
     onProgress: ({ stage, loaded, total }) => {
-      if (stage === 'weights' && total) {
-        statusEl.textContent = `weights ${Math.round((loaded / total) * 100)}%`;
-        bar.style.width = `${(loaded / total) * 100}%`;
+      if (stage === 'weights') {
+        /* content-length is the length of the body ON THE WIRE; the bytes
+           counted here are what came out of the decoder. GitHub Pages serves
+           the weights gzipped — barely compressible at 2 bits per value, but
+           enough that this read "weights 104%". When the header cannot be
+           trusted, say how much arrived rather than invent a denominator. */
+        const frac = total ? loaded / total : 0;
+        statusEl.textContent = frac > 0 && frac <= 1
+          ? `weights ${Math.round(frac * 100)}%`
+          : `weights ${(loaded / 1048576).toFixed(1)} MB`;
+        bar.style.width = `${Math.min(1, frac) * 100}%`;
       } else if (stage === 'weights-cached') statusEl.textContent = 'weights cached';
       else if (stage === 'fallback') statusEl.textContent = 'weights ← huggingface';
       else if (stage === 'engine') statusEl.textContent = 'engine';

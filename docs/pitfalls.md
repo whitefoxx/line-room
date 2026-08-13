@@ -285,3 +285,35 @@ At `devicePixelRatio: 1` the same CSS draws the full circle, which is exactly
 why this survives review on one machine and not another. Any element with a
 dash pattern has to opt out of `non-scaling-stroke`; at this scale (0.96) the
 hairline is unchanged to the eye.
+
+---
+
+## Invisible hit boxes go wrong quietly, and only on some screens
+
+Objects are picked by raycasting against invisible proxy boxes, because hitting
+a 1px line with a mouse is hopeless. The cost is that the thing you click and
+the thing you see are two different shapes, and nothing on screen tells you when
+they disagree — the object simply stops responding and you assume you missed.
+
+Three were found this way, all by measurement rather than by clicking around:
+
+```
+414x896   ceiling_light < fan     the light switch, i.e. the main control
+414x896   door          < fan
+1440x788  curtains      < mobile
+```
+
+The ceiling fan's proxy was a 4 x 1 x 4 slab at ceiling height. On a phone the
+camera pulls a long way back to fit the room in a narrow frame, the projection
+flattens toward orthographic, and that slab sweeps across the entire back wall.
+It was fine on the machine it was drawn on and broken on a phone.
+
+The diagnostic that finds them: for every device, project its proxy's bounding
+box to screen, sample a grid across that footprint, raycast each sample, and
+count how many come back with *this* device as the nearest hit. Run it at
+several viewport sizes. A device that wins zero samples is unclickable.
+
+Aiming only at the centre is too strict — the globe genuinely sits in front of
+the middle of the cabinet, and the cabinet is still clickable across the rest of
+its face (24 of 58 samples). Count area, not centres, or you will shrink boxes
+that were never broken.
