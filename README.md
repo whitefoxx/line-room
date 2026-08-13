@@ -156,7 +156,7 @@ download is worth knowing about on mobile data.
 
 `index.html` is the application: markup, CSS, the room's geometry, the animation
 system, the audio synthesis, the device registry, the parser, the worker and the
-wiring — about 2,600 readable lines, in that order. three.js and Needle's
+wiring — about 2,850 readable lines, in that order. three.js and Needle's
 emscripten glue are inlined at the *bottom*, minified and unmodified, so opening
 the file shows you the project rather than 600 KB of somebody else's build
 output. The worker is assembled at runtime from an inert `<script type="text/plain">`
