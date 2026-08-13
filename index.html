@@ -102,6 +102,20 @@
 
   #hint { min-height: 15px; }
 
+  /* ---------------- source ----------------
+     The one thing on screen that leaves the page. It sits opposite the dial in
+     the same hairline label style, at the opacity of a pencil note in a margin
+     — visible if you go looking, invisible if you are talking to the room.
+     A demo posted to a forum whose source nobody can find is a screenshot. */
+  #source {
+    position: fixed; z-index: 3;
+    left: calc(var(--edge) + env(safe-area-inset-left));
+    bottom: calc(36px + env(safe-area-inset-bottom));
+    color: inherit; text-decoration: none; opacity: .38;
+    transition: opacity .2s, background .15s;
+  }
+  #source:hover, #source:focus-visible { opacity: 1; background: var(--ink); color: var(--paper); }
+
   /* ---------------- transient caption ---------------- */
 
   /* the caption belongs to the dial, so it sits with it in the corner */
@@ -233,6 +247,9 @@
   <div id="hint" class="label">hold to speak</div>
 </div>
 
+<a id="source" class="label" href="https://github.com/whitefoxx/line-room"
+   target="_blank" rel="noopener">source ↗</a>
+
 <button id="tray" aria-label="console" aria-expanded="false">
   <svg class="open" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 3h12M1 7h12M1 11h12"/></svg>
   <svg class="close" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg>
@@ -280,6 +297,14 @@
       parser in about a millisecond and never reach the model; anything with a
       sentence around it goes to Needle. The caption tells you which one
       answered and how long it took.</p>
+
+      <p><b>The source</b> is one HTML file —
+      <a href="https://github.com/whitefoxx/line-room" target="_blank" rel="noopener">github.com/whitefoxx/line-room</a>
+      — markup, CSS, the room's geometry, the animation, the audio synthesis,
+      the device registry, the parser and the worker, in that order, with
+      three.js and Needle's glue inlined at the bottom. Apache&nbsp;2.0. The
+      notes on what the schema experiments actually measured, and on the
+      fine-tune that lost, are in the README.</p>
 
       <p class="thanks">Thanks to Animnia for the room and to Cactus for putting
       a capable tool-caller in 14&nbsp;MB.</p>
