@@ -1711,7 +1711,6 @@ try {
        is the honest answer: the whole room, smaller. Landscape is untouched —
        the scale factor is clamped at 1. */
     const cam = sceneDef.camera;
-    const DESIGN_ASPECT = cam.designAspect || 1.97;
     const target = new THREE.Vector3(...cam.lookAt);
     const eye = new THREE.Vector3(...cam.position);
     const baseDist = eye.distanceTo(target);
@@ -1719,13 +1718,91 @@ try {
 
     const camera = new THREE.PerspectiveCamera(cam.fov, 1, 0.1, 400);
 
-    function frame() {
-      const aspect = window.innerWidth / window.innerHeight;
-      camera.aspect = aspect;
-      const pull = Math.max(1, DESIGN_ASPECT / Math.max(aspect, 0.2));
-      camera.position.copy(target).addScaledVector(dir, baseDist * pull);
+    /* Corners of what is actually drawn — measured once, after build(), and
+       deliberately excluding the pick proxies: several of those are larger than
+       the object they stand for, and framing the room around a hit box is not
+       what anyone wants. */
+    let corners = null;
+    const shown = (o) => { for (let n = o; n; n = n.parent) if (!n.visible) return false; return true; };
+    function measure(root) {
+      const box = new THREE.Box3();
+      root.traverse((o) => {
+        /* Hit boxes are not part of the picture, and Box3.setFromObject happily
+           includes hidden children — steam, the lamp's light cone, the meow
+           marks — several of which sit outside the walls and were quietly
+           framing the room around scenery nobody can see. */
+        if (!o.geometry || o.userData.isProxy || !shown(o)) return;
+        o.updateWorldMatrix(true, false);
+        const b = new THREE.Box3().setFromObject(o);
+        if (Number.isFinite(b.min.x)) box.union(b);
+      });
+      corners = [];
+      for (let i = 0; i < 8; i++) {
+        corners.push(new THREE.Vector3(
+          i & 1 ? box.max.x : box.min.x,
+          i & 2 ? box.max.y : box.min.y,
+          i & 4 ? box.max.z : box.min.z));
+      }
+    }
+
+    const place = (d) => {
+      camera.position.copy(target).addScaledVector(dir, d);
       camera.lookAt(target);
       camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+    };
+
+    /* How much of the frame the room may span sideways. Not 1: a drawing needs
+       air. (Named at length because `FILL` is already the shared fill material
+       in this file, and shadowing it here cost a debugging round.) */
+    const FRAME_SIDES = 0.94;
+    const DESIGN_ASPECT = cam.designAspect || 1.97;
+    const probe = new THREE.Vector3();
+
+    function extent() {
+      let ex = 0, ey = 0;
+      for (const c of corners) {
+        probe.copy(c).project(camera);
+        ex = Math.max(ex, Math.abs(probe.x));
+        ey = Math.max(ey, Math.abs(probe.y));
+      }
+      return { ex, ey };
+    }
+
+    /* The vertical budget is whatever the room was COMPOSED to use, measured
+       rather than assumed — and it is a little over 1, because the authored
+       framing deliberately runs the floor off the bottom edge. Targeting a
+       tidy 0.94 on both axes would have quietly re-framed the desktop view to
+       something nobody drew. Sideways is different: a wall cut off at the edge
+       reads as a bug, so that axis gets the 0.94. */
+    let designTop = 1;
+    function calibrate() {
+      const keep = camera.aspect;
+      camera.aspect = DESIGN_ASPECT;
+      place(baseDist);
+      designTop = Math.max(FRAME_SIDES, extent().ey);
+      camera.aspect = keep;
+    }
+
+    function frame() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      if (!corners) { place(baseDist); return; }
+      /* Walk the camera backwards along its own sight line until the room fits,
+         rather than widening the field of view — a wider fov turns an isometric
+         drawing into a fisheye. Never closer than the distance the room was
+         composed at, and at the design aspect this lands exactly on it.
+         Projected extent is not quite proportional to 1/distance under
+         perspective, so solve it by iteration; two or three passes converge. */
+      let d = baseDist;
+      for (let pass = 0; pass < 6; pass++) {
+        place(d);
+        const { ex, ey } = extent();
+        const need = Math.max(ex / FRAME_SIDES, ey / designTop);
+        if (need <= 1) break;
+        const next = Math.max(baseDist, d * need);
+        if (Math.abs(next - d) < 0.01) { d = next; place(d); break; }
+        d = next;
+      }
     }
     frame();
 
@@ -1736,6 +1813,10 @@ try {
     (canvasParent || document.body).appendChild(renderer.domElement);
 
     const handles = sceneDef.build(scene);
+    /* now that there is something to look at, measure it and frame it */
+    measure(scene);
+    calibrate();
+    frame();
     const state = { night: false, switchOn: false };
     const registry = createRegistry(sceneDef.devices({ scene, handles, audio: RoomAudio, state }));
     const paletteExtras = (sceneDef.paletteExtras && sceneDef.paletteExtras(handles)) || [];

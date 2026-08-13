@@ -148,9 +148,13 @@ to Google. That is the only thing in this project that leaves your machine. The
 room itself, the model and the inference are entirely local, and every browser
 can click.
 
-**On a phone** the camera walks backwards until the whole room fits the narrower
-frame, so portrait shows the room as a band rather than a fisheye. The 14 MB
-download is worth knowing about on mobile data.
+**On a phone** the camera walks backwards along its own sight line until the
+room fits the narrower frame, rather than widening the field of view — which
+would turn an isometric drawing into a fisheye. Portrait shows the whole room as
+a band filling 92% of the width. On a wide screen the camera does not move at
+all, so the framing you see there is the one the room was drawn in, floor
+bleeding off the bottom edge and all. The 14 MB download is worth knowing about
+on mobile data.
 
 ## One file, on purpose
 

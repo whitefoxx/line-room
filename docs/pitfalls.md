@@ -317,3 +317,34 @@ Aiming only at the centre is too strict — the globe genuinely sits in front of
 the middle of the cabinet, and the cabinet is still clickable across the rest of
 its face (24 of 58 samples). Count area, not centres, or you will shrink boxes
 that were never broken.
+
+---
+
+## Folding modules into one file collapses their scopes
+
+Obvious in hindsight, and it still bit within the hour. Adding a local constant
+to the framing code:
+
+```js
+const FILL = 0.94;      // how much of the frame the room may span
+```
+
+`FILL` is also the shared white fill material, defined at the top of the file
+and used by every object in the room. Inside one module that is two names in two
+scopes; inside one file it is one name, and the room booted to
+`Cannot read properties of undefined (reading 'set')` from a line that had not
+been touched.
+
+ES modules make each file a scope for free and hide this class of collision
+completely. A single-file page has one scope, so a new name has to be checked
+against the whole file, not the section you are editing. The merge itself was
+safe — every top-level name across the thirteen modules was verified unique
+before they were concatenated — but that guarantee expires the moment you add
+the next line.
+
+Two things make it survivable rather than mysterious:
+
+- **Wrap the whole app in try/catch and print the error onto the page.** A blank
+  white page is the worst failure a demo can have, because it looks like nothing
+  and nobody reports it. This one named its file, line and message immediately.
+- **Prefix names that are only meaningful locally** — `FRAME_FILL`, not `FILL`.
