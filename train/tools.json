@@ -1,0 +1,66 @@
+[
+  {
+    "name": "set_light",
+    "description": "Turn a light on or off.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "light": { "type": "string", "enum": ["desk_lamp", "ceiling_light"] },
+        "on": { "type": "boolean" }
+      },
+      "required": ["light", "on"]
+    }
+  },
+  {
+    "name": "set_fan",
+    "description": "Set the ceiling fan speed. \"high\" is the maximum.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "speed": { "type": "string", "enum": ["off", "low", "medium", "high"] }
+      },
+      "required": ["speed"]
+    }
+  },
+  {
+    "name": "set_open",
+    "description": "Open or close something. For the chair and the book, open means pulled out; for the picture, tilted.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "enum": ["door", "window", "blinds", "drawer", "chair", "cabinet", "book", "picture"]
+        },
+        "open": { "type": "boolean" }
+      },
+      "required": ["target", "open"]
+    }
+  },
+  {
+    "name": "set_running",
+    "description": "Start or stop something that moves or plays: the record player (music), the spinning globe, the hanging mobile, the clock pendulum, the swaying plant, the steam off the coffee mug.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "enum": ["coffee_mug", "wall_clock", "plant", "globe", "mobile", "record_player", "music"]
+        },
+        "on": { "type": "boolean" }
+      },
+      "required": ["target", "on"]
+    }
+  },
+  {
+    "name": "poke",
+    "description": "Give something a nudge: bounce the ball, toss the sofa pillow.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "target": { "type": "string", "enum": ["pillow", "ball"] }
+      },
+      "required": ["target"]
+    }
+  }
+]

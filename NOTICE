@@ -1,0 +1,54 @@
+line-room
+Copyright 2026 Yunbiao Cheng
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+--------------------------------------------------------------------------
+pure-line-room
+--------------------------------------------------------------------------
+
+This product includes software developed by Animnia as part of pure-line-room
+(https://github.com/Animnia/pure-line-room), licensed under the Apache License,
+Version 2.0.
+
+Taken from that work and still recognisable here:
+
+  the room geometry and the line/fill drawing helpers — black 1px edges over
+    white fills pushed back by a polygon offset, which is what makes the whole
+    scene read as a single pen drawing with no lighting and no shading
+  the renderer setup, hover bolding via fat lines, and picking
+  the day/night palette inversion
+  the Web Audio synthesis
+
+Changed in this fork:
+
+  every object became a device with an ABSOLUTE setter rather than a
+    click-toggle, so "turn the lamp off" is a no-op when the lamp is already
+    off — language is idempotent in a way a mouse click is not
+  a scene-agnostic stage, registry, parser and worker sit under the room, so
+    the schema experiments could be run against more than one scene
+  the room was refitted as a smart home and given a tool schema
+  the six recorded sound samples were dropped in favour of the synthesized
+    fallbacks that already existed beside them
+
+--------------------------------------------------------------------------
+Cactus Needle 2
+--------------------------------------------------------------------------
+
+This product includes Cactus Needle 2 (https://cactuscompute.com/needle),
+Copyright Cactus Compute, licensed under the Apache License, Version 2.0:
+
+  needle.wasm      the official WebAssembly build of the inference engine
+  needle2.cact     the 45M-parameter weights, quantized to ~2 bits
+  the emscripten glue, inlined at the bottom of index.html
+
+Both binaries are redistributed unmodified. Upstream:
+https://huggingface.co/Cactus-Compute/needle2
+
+--------------------------------------------------------------------------
+three.js
+--------------------------------------------------------------------------
+
+three.js r128 and its LineSegmentsGeometry / LineMaterial / LineSegments2
+examples, Copyright 2010-2021 three.js authors, MIT licensed. Inlined
+unmodified at the bottom of index.html.

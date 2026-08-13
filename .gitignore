@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+
+# Fine-tuning working files: a 90 MB base checkpoint, a 180 MB fp32 copy, the
+# LoRA adapter, and a dataset that make_dataset.py regenerates deterministically.
+.venv/
+train/checkpoints/
+train/data/
+train/*.log
+
+# The tuned weights lost to the base on refusals (see README) and are not shipped.
+needle2-tuned.cact
